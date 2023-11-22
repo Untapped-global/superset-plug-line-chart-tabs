@@ -1,4 +1,4 @@
-import React, { useEffect, createRef, useState, SetStateAction } from "react";
+import React, { useEffect, createRef, useState } from "react";
 import { styled } from "@superset-ui/core";
 import {
   SupersetPlugLineChartTabsProps,
@@ -7,185 +7,6 @@ import {
 import { Line } from "@ant-design/plots";
 
 const Styles = styled.div<SupersetPlugLineChartTabsStylesProps>`
-  .tabs {
-    display: flex;
-    gap: 12px;
-  }
-  .charts {
-    max-width: 235px;
-    height: 50px;
-  }
-  h2 {
-    font-size: 14px;
-  }
-  .button-group {
-    display: flex;
-    border: 1px solid #ccc;
-  }
-
-  /* Hide all tab content by default */
-  .tabcontent {
-    display: none;
-  }
-
-  /* Style the tab buttons */
-  .tablink {
-    background-color: #fff;
-    cursor: pointer;
-    color: black;
-    border-radius: none;
-    border-right-color: #f4f4f5;
-    border-right-width: 2px;
-  }
-  .tablink:focus {
-    outline: none;
-  }
-  .tablink:hover {
-    border-color: #fff;
-  }
-
-  .line {
-    margin-top: 10px;
-    border: none;
-    border-top: 1px solid #ccc;
-  }
-
-  /* Style the active tab button */
-  .tablink.active {
-    background-color: #f4f4f5;
-    border-radius: 0px;
-  }
-
-  /* Show the active tab */
-  .tabcontent.active {
-    display: block;
-  }
-  .container {
-    margin-right: auto;
-    margin-left: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .table {
-    width: 100%;
-    border: 1px solid $color-form-highlight;
-  }
-
-  .table-header {
-    display: flex;
-    width: 100%;
-  }
-  .hit-unit {
-    background-color: #abeab2;
-    width: 113px;
-    height: 52px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-  }
-  .hit-unit-two {
-    background-color: #ffe48c;
-    width: 113px;
-    height: 52px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-  }
-  .hit-unit-three {
-    background-color: #abeab2;
-    width: 113px;
-    height: 52px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-  }
-  .hit-unit-four {
-    background-color: #ff8390;
-    width: 113px;
-    height: 52px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-  }
-  .hit-unit-five {
-    background-color: #abeab2;
-    width: 113px;
-    height: 52px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-  }
-  .hit-unit-target {
-    background-color: #f4f4f5;
-    width: 78px;
-    height: 52px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-  }
-
-  .table-row {
-    display: flex;
-    width: 100%;
-    margin-top: 10px;
-    align-items: center;
-  }
-
-  .table-data,
-  .header__item {
-    flex: 1 1 20%;
-    text-align: center;
-  }
-  .table-batteries {
-    flex: 1 1 20%;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .footer {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-  }
-  h4 {
-    font-size: 16px;
-    font-weight: 500;
-  }
-  .filter__link {
-    text-decoration: none;
-    position: relative;
-    display: inline-block;
-    &.desc::after {
-      content: "(desc)";
-    }
-
-    &.asc::after {
-      content: "(asc)";
-    }
-  }
-  .individual-tab {
-    display: flex;
-    gap: 2px;
-  }
-  .metrics {
-    display: flex;
-    align-items: flex-start;
-    flex-direction: column;
-    justify-content: center;
-    gap: "16px";
-    width: "60%";
-    padding: 60px 40px 60px;
-    box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.05);
-  }
   .logo {
     height: 6em;
     padding: 1.5em;
@@ -248,10 +69,22 @@ export default function SupersetPlugLineChartTabs(
 ) {
   const rootElem = createRef<HTMLDivElement>();
   const { height, width } = props;
-  const [activeTab, setActiveTab] = useState("tab1");
+  const [activeTab, setActiveTab] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const openTab = (tabName: SetStateAction<string>) => {
-    setActiveTab(tabName);
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const standingsColors: { [x: string]: string } = {
+    good: "#ABEAB2",
+    average: "#FFE48C",
+    bad: "#FF8390",
   };
   const config = {
     xField: "year",
@@ -287,368 +120,517 @@ export default function SupersetPlugLineChartTabs(
       height={height}
       width={width}
     >
-      <div className="metrics">
-        <h1>Asaak Key Metrics Snapshot for Nov 2023 </h1>
-        <div>
-          <div className="tabs">
-            <h2>Comparison Period</h2>
-            <div className="button-group">
-              <button
-                className={activeTab === "tab1" ? "tablink active" : "tablink"}
-                onClick={() => openTab("tab1")}
-              >
-                1 week
-              </button>
-              <button
-                className={activeTab === "tab2" ? "tablink active" : "tablink"}
-                onClick={() => openTab("tab2")}
-              >
-                1 month
-              </button>
-              <button
-                className={activeTab === "tab3" ? "tablink active" : "tablink"}
-                onClick={() => openTab("tab3")}
-              >
-                3 months
-              </button>
-              <button
-                className={activeTab === "tab4" ? "tablink active" : "tablink"}
-                onClick={() => openTab("tab4")}
-              >
-                6 months
-              </button>
-              <button
-                className={activeTab === "tab5" ? "tablink active" : "tablink"}
-                onClick={() => openTab("tab5")}
-              >
-                1 year
-              </button>
-              <button
-                className={activeTab === "tab6" ? "tablink active" : "tablink"}
-                onClick={() => openTab("tab6")}
-              >
-                All time
-              </button>
+      <div
+        style={{ display: "flex", justifyContent: "center", height: "100vh" }}
+      >
+        <div
+          style={{
+            padding: isMobile ? "20px 10px" : "40px 60px 32px 60px",
+            borderRadius: "12px",
+            overflow: "hidden",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: "isMobile ? '10px' : '30px'",
+            display: "inline-flex",
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+              gap: "12px",
+              display: "flex",
+            }}
+          >
+            <div
+              style={{
+                color: "#202945",
+                fontSize: "20px",
+                fontFamily: "Inter",
+                fontWeight: "600",
+                lineHeight: "24px",
+                wordWrap: "break-word",
+              }}
+            >
+              Asaak Key Metrics Snapshot for Nov 2023{" "}
             </div>
           </div>
-          <hr className="line" />
+
+          {/* Comparison Period */}
           <div
-            id="tab1"
-            className={
-              activeTab === "tab1" ? "tabcontent active" : "tabcontent"
-            }
+            style={{
+              alignItems: "center",
+              gap: "12px",
+              display: "inline-flex",
+            }}
           >
-            <h2>Tab 1 Content</h2>
-            <div className="container">
-              <div className="table">
-                <div className="table-header">
-                  <div className="header__item">
-                    <p id="name" className="filter__link">
-                      Performance Indicators
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p id="wins" className="filter__link filter__link--number">
-                      Current
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p id="draws" className="filter__link filter__link--number">
-                      Target
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p
-                      id="losses"
-                      className="filter__link filter__link--number"
+            <div
+              style={{
+                color: "#202945",
+                fontSize: "14px",
+                fontFamily: "Inter",
+                fontWeight: "400",
+                lineHeight: "19.6px",
+                wordWrap: "break-word",
+              }}
+            >
+              Comparison Period
+            </div>
+            {/*  */}
+            <div
+              style={{
+                boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
+                borderRadius: "8px",
+                overflow: "hidden",
+                border: "0.86px #D0D5DD solid",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                display: "flex",
+                cursor: "pointer",
+              }}
+            >
+              {[
+                "1 week",
+                "1 month",
+                "3 months",
+                "6 months",
+                "1 year",
+                "All time",
+              ].map((duration, id) => {
+                return (
+                  <div
+                    style={{
+                      paddingLeft: "13.78px",
+                      paddingRight: "13.78px",
+                      paddingTop: "6.89px",
+                      paddingBottom: "6.89px",
+                      background: activeTab === id ? "#F4F4F5" : "",
+                      borderRight: "0.86px #D0D5DD solid",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "6.89px",
+                      display: "flex",
+                    }}
+                    onClick={() => setActiveTab(id)}
+                    key={duration}
+                  >
+                    <div
+                      style={{
+                        color: "#344054",
+                        fontSize: "14px",
+                        fontFamily: "Inter",
+                        fontWeight: "600",
+                        lineHeight: "20px",
+                        wordWrap: "break-word",
+                      }}
                     >
-                      Trend
-                    </p>
+                      {duration}
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Line */}
+          <div
+            style={{
+              width: "100%",
+              margin: "30px 0",
+
+              border: "1px #E3E3E8 solid",
+            }}
+          />
+
+          {/* Content */}
+          <div
+            style={{
+              padding: "8px 0 40px 0",
+              background: "white",
+              overflow: "hidden",
+              flexDirection: "column",
+              gap: "16px",
+              display: "inline-flex",
+            }}
+          >
+            <div
+              style={{
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: "8px",
+                display: "flex",
+              }}
+            >
+              {/* Heatmap */}
+              <div
+                style={{
+                  width: "100%",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "flex-end",
+                  gap: "8px",
+                  display: "inline-flex",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    padding: "12px 0px",
+                    alignItems: "center",
+                    alignSelf: "stretch",
+                    color: "#3E404C",
+                    fontFamily: "Inter",
+                    fontSize: "16px",
+                    fontStyle: "normal",
+                    fontWeight: "700",
+                    lineHeight: "140%;",
+                  }}
+                >
+                  {[
+                    {
+                      title: "Performance Indicators",
+                      style: { width: "223px", marginRight: "30px" },
+                    },
+                    {
+                      title: "Current",
+                      style: { width: "116px", marginLeft: "30px" },
+                    },
+                    {
+                      title: "Target",
+                      style: { width: "116px", marginLeft: "30px" },
+                    },
+                    {
+                      title: "Trend",
+                      style: {
+                        width: "130px",
+                        textAlign: "right",
+                        marginLeft: "20px",
+                      },
+                    },
+                  ].map(({ title, style }) => (
+                    <div
+                      style={{ ...(style as React.CSSProperties) }}
+                      key={title}
+                    >
+                      {title}
+                    </div>
+                  ))}
                 </div>
-                <div className="table-content">
-                  <div className="table-row">
-                    <div className="table-data">Performance</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit">2</div>
+
+                {/* Indicators */}
+                {[
+                  {
+                    title: "Perfomance",
+                    current: "85",
+                    currentStanding: "good",
+                    target: "80%",
+                    trend: { value: "6.5%", flow: "up" },
+                  },
+                  {
+                    title: "Capital efficiency",
+                    current: "72%",
+                    currentStanding: "average",
+                    target: "90%",
+                    trend: { value: "6.5%", flow: "up" },
+                  },
+                  {
+                    title: "Loan portfolio health",
+                    current: "98%",
+                    currentStanding: "good",
+                    target: "95%",
+                    trend: { value: "6.5%", flow: "up" },
+                  },
+                  {
+                    title: "Integration status",
+                    current: "426",
+                    currentStanding: "bad",
+                    target: "700",
+                    trend: { value: "4.5%", flow: "down" },
+                  },
+                  {
+                    title: "Financial situation",
+                    current: "400",
+                    currentStanding: "average",
+                    target: "570",
+                    trend: { value: "6.5%", flow: "down" },
+                  },
+                ].map(({ title, current, currentStanding, target, trend }) => {
+                  return (
+                    <div
+                      style={{
+                        alignSelf: "stretch",
+                        alignItems: "center",
+                        gap: "33px",
+                        display: "inline-flex",
+                      }}
+                    >
+                      {/* Indicator Title */}
+                      <div
+                        style={{
+                          color: "#3E404C",
+                          fontSize: "16px",
+                          fontFamily: "Inter",
+                          fontWeight: "400",
+                          lineHeight: "22.4px",
+                          wordWrap: "break-word",
+                          width: "223px",
+                        }}
+                      >
+                        {title}
+                      </div>
+
+                      <div
+                        style={{
+                          gap: "35px",
+                          display: "flex",
+                        }}
+                      >
+                        <div
+                          style={{
+                            paddingRight: "18px",
+                            gap: "24px",
+                            display: "flex",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: "113px",
+                              height: "52px",
+                              padding: "8px",
+                              background: standingsColors[currentStanding],
+                              borderRadius: "8px",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              gap: "8px",
+                              display: "flex",
+                            }}
+                          >
+                            <div
+                              style={{
+                                textAlign: "center",
+                                color: "#202945",
+                                fontSize: "16px",
+                                fontFamily: "Inter",
+                                fontWeight: "700",
+                                lineHeight: "22.4px",
+                                wordWrap: "break-word",
+                              }}
+                            >
+                              {current}
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              display: "flex",
+                              width: "78px",
+                              height: "52px",
+                              padding: "8px",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              gap: "8px",
+                              borderRadius: "8px",
+                              background: "#F4F4F5",
+                            }}
+                          >
+                            <div
+                              style={{
+                                color: "#202945",
+                                textAlign: "center",
+                                fontFamily: "Inter",
+                                fontSize: "16px",
+                                fontStyle: "normal",
+                                fontWeight: 700,
+                                lineHeight: "140%",
+                              }}
+                            >
+                              {target}
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            width: "100%",
+                            // height: "100%",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "16px",
+                            display: "flex",
+                          }}
+                        >
+                          <div
+                            style={{
+                              textAlign: "center",
+                              color: "#202945",
+                              fontSize: "16px",
+                              fontFamily: "Inter",
+                              fontWeight: "400",
+                              lineHeight: "22.4px",
+                              wordWrap: "break-word",
+                            }}
+                          >
+                            {trend.value}
+                          </div>
+                          <div
+                            style={{
+                              width: "18px",
+                            }}
+                          >
+                            <svg
+                              width="13"
+                              height="19"
+                              viewBox="0 0 13 19"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                id="Arrow 1"
+                                d={
+                                  trend.flow === "up"
+                                    ? "M6.5 0.458984L0.0336766 11.659L12.9663 11.659L6.5 0.458984ZM5.38 10.539L5.38 18.459L7.62 18.459L7.62 10.539L5.38 10.539Z"
+                                    : "M6.5 18.459L12.9663 7.25898L0.0336772 7.25898L6.5 18.459ZM7.62 8.37898L7.62 0.458984L5.38 0.458984L5.38 8.37898L7.62 8.37898Z"
+                                }
+                                fill={
+                                  trend.flow === "up" ? "#71C179" : "#D74C5B"
+                                }
+                              />
+                            </svg>
+                          </div>
+
+                          <div style={{}}>
+                            <div
+                              style={{
+                                width: "118px",
+                                height: "32px",
+
+                                border: "0.50px #202945 solid",
+                              }}
+                            >
+                              <Line data={[]} {...config} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Capital efficiency</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-two">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Loan portfolio</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Integration status</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-four">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Financial situation</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-two">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                </div>
+                  );
+                })}
+                {/* Indicators End */}
               </div>
             </div>
           </div>
+
+          {/* Line */}
           <div
-            id="tab2"
-            className={
-              activeTab === "tab2" ? "tabcontent active" : "tabcontent"
-            }
+            style={{
+              width: "100%",
+              margin: "30px 0",
+              border: "1px #E3E3E8 solid",
+            }}
+          />
+
+          {/*  */}
+          <div
+            style={{
+              paddingRight: "12px",
+              justifyContent: "space-between",
+              width: "900px",
+              alignItems: "center",
+              display: "inline-flex",
+            }}
           >
-            <h2>Tab 2 Content</h2>
-            <div className="container">
-              <div className="table">
-                <div className="table-header">
-                  <div className="header__item">
-                    <p id="name" className="filter__link">
-                      Performance Indicators
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p id="wins" className="filter__link filter__link--number">
-                      Current
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p id="draws" className="filter__link filter__link--number">
-                      Target
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p
-                      id="losses"
-                      className="filter__link filter__link--number"
-                    >
-                      Trend
-                    </p>
-                  </div>
-                </div>
-                <div className="table-content">
-                  <div className="table-row">
-                    <div className="table-data">Performance</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Capital efficiency</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-two">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Loan portfolio</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Integration status</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-four">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Financial situation</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-two">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                </div>
+            <div
+              style={{
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: "33px",
+                display: "flex",
+              }}
+            >
+              <div
+                style={{
+                  color: "#3E404C",
+                  fontSize: "16px",
+                  fontFamily: "Inter",
+                  fontWeight: "400",
+                  lineHeight: "22.4px",
+                  wordWrap: "break-word",
+                }}
+              >
+                Forex exchange rate{" "}
               </div>
             </div>
-          </div>
-          <div
-            id="tab3"
-            className={
-              activeTab === "tab3" ? "tabcontent active" : "tabcontent"
-            }
-          >
-            <h2>Tab 3 Content</h2>
-            <div className="container">
-              <div className="table">
-                <div className="table-header">
-                  <div className="header__item">
-                    <p id="name" className="filter__link">
-                      Performance Indicators
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p id="wins" className="filter__link filter__link--number">
-                      Current
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p id="draws" className="filter__link filter__link--number">
-                      Target
-                    </p>
-                  </div>
-                  <div className="header__item">
-                    <p
-                      id="losses"
-                      className="filter__link filter__link--number"
-                    >
-                      Trend
-                    </p>
-                  </div>
-                </div>
-                <div className="table-content">
-                  <div className="table-row">
-                    <div className="table-data">Performance</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Capital efficiency</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-two">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Loan portfolio</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Integration status</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-four">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                  <div className="table-row">
-                    <div className="table-data">Financial situation</div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-two">2</div>
-                    </div>
-                    <div className="table-batteries">
-                      <div className="hit-unit-target">2</div>
-                    </div>
-                    <div className="table-data">
-                      {" "}
-                      <Line data={[]} {...config} />
-                    </div>
-                  </div>
-                </div>
+            <div
+              style={{
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: "33px",
+                display: "flex",
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    color: "#3E404C",
+                    fontSize: "16px",
+                    fontFamily: "Inter",
+                    fontWeight: "400",
+                    lineHeight: "22.40px",
+                    wordWrap: "break-word",
+                  }}
+                >
+                  Current :{" "}
+                </span>
+                <span
+                  style={{
+                    color: "#3E404C",
+                    fontSize: "16px",
+                    fontFamily: "Inter",
+                    fontWeight: "500",
+                    lineHeight: "22.4px",
+                    wordWrap: "break-word",
+                  }}
+                >
+                  $1 to KES 151.34{" "}
+                </span>
               </div>
             </div>
-          </div>{" "}
-          <hr className="line" />
-          <div className="footer">
-            <h4>Forex exchange rate</h4>
-            <h4>Current : $1 to KES 151.34</h4>
-            <h4>At Deal start: $1 to KES 131.21</h4>
+            <div
+              style={{
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: "33px",
+                display: "flex",
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    color: "#3E404C",
+                    fontSize: "16px",
+                    fontFamily: "Inter",
+                    fontWeight: "400",
+                    lineHeight: "22.4px",
+                    wordWrap: "break-word",
+                  }}
+                >
+                  At Deal start:{" "}
+                </span>
+                <span
+                  style={{
+                    color: "#3E404C",
+                    fontSize: "16px",
+                    fontFamily: "Inter",
+                    fontWeight: "500",
+                    lineHeight: "22.4px",
+                    wordWrap: "break-word",
+                  }}
+                >
+                  $1 to KES 131.21{" "}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
